@@ -16,6 +16,8 @@ interface Court {
   drop_day_offset: number | null;
   drop_time: string | null;
   drop_time_confidence: "unknown" | "learned" | "confirmed";
+  clubspark_slug: string | null;
+  venue_uuid: string | null;
 }
 
 export async function GET(req: NextRequest) {
@@ -34,7 +36,7 @@ export async function GET(req: NextRequest) {
 
   const { data: courts, error } = await supabase
     .from("courts")
-    .select("id, name, postcode, lat, lng, drop_day_offset, drop_time, drop_time_confidence");
+    .select("id, name, postcode, lat, lng, drop_day_offset, drop_time, drop_time_confidence, clubspark_slug, venue_uuid");
 
   if (error) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });

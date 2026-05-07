@@ -17,6 +17,13 @@ interface Court {
   drop_day_offset: number | null;
   drop_time: string | null;
   drop_time_confidence: "unknown" | "learned" | "confirmed";
+  clubspark_slug: string | null;
+  venue_uuid: string | null;
+}
+
+function ltaUrl(court: Court): string | null {
+  if (!court.clubspark_slug || !court.venue_uuid) return null;
+  return `https://www.lta.org.uk/play/book-a-tennis-court/courts/${court.clubspark_slug}_${court.venue_uuid}/`;
 }
 
 interface Coords {
@@ -210,6 +217,17 @@ function CourtCard({
             <DropTimeBadge confidence={court.drop_time_confidence} />
             <span className="text-[10px] text-gray-400 font-medium">{dropLabel}</span>
           </div>
+          {ltaUrl(court) && (
+            <a
+              href={ltaUrl(court)!}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-block mt-2 text-[10px] font-display font-semibold uppercase tracking-wider text-brand/50 hover:text-brand transition-colors"
+            >
+              View on LTA ↗
+            </a>
+          )}
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
