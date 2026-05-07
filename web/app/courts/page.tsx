@@ -32,20 +32,20 @@ const TIME_SLOTS = Array.from({ length: 15 }, (_, i) => {
 function DropTimeBadge({ confidence }: { confidence: Court["drop_time_confidence"] }) {
   if (confidence === "unknown") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5">
+      <span className="inline-flex items-center gap-1 font-display font-semibold text-[10px] uppercase tracking-wider bg-gold/10 text-gold-dark border border-gold/30 rounded-full px-2 py-0.5">
         ⏳ Learning
       </span>
     );
   }
   if (confidence === "learned") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5">
-        📊 Estimated
+      <span className="inline-flex items-center gap-1 font-display font-semibold text-[10px] uppercase tracking-wider bg-brand/10 text-brand border border-brand/20 rounded-full px-2 py-0.5">
+        ◎ Estimated
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded-full px-2 py-0.5">
+    <span className="inline-flex items-center gap-1 font-display font-semibold text-[10px] uppercase tracking-wider bg-coral/10 text-coral-dark border border-coral/20 rounded-full px-2 py-0.5">
       ✓ Confirmed
     </span>
   );
@@ -101,9 +101,9 @@ function AlertForm({ court }: { court: Court }) {
 
   if (status === "success") {
     return (
-      <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3">
-        <p className="text-green-800 text-sm font-medium">✓ Alert set</p>
-        <p className="text-green-700 text-sm mt-1">{message}</p>
+      <div className="mt-3 bg-brand/5 border border-brand/20 rounded-xl p-3">
+        <p className="font-display font-bold uppercase tracking-wide text-brand text-xs">✓ Alert set</p>
+        <p className="text-gray-600 text-xs mt-1 leading-relaxed">{message}</p>
       </div>
     );
   }
@@ -111,31 +111,31 @@ function AlertForm({ court }: { court: Court }) {
   return (
     <form onSubmit={submit} className="mt-3 space-y-3 border-t border-gray-100 pt-3">
       {court.drop_time_confidence === "unknown" && (
-        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
-          ⏳ We&apos;re still learning when this court&apos;s bookings drop. We&apos;ll notify you once we&apos;ve observed the pattern — usually within 2 weeks.
+        <p className="text-xs text-gold-dark bg-gold/10 border border-gold/20 rounded-xl p-2.5 leading-relaxed">
+          ⏳ Still learning this court&apos;s booking pattern — usually takes ~2 weeks to confirm.
         </p>
       )}
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+          <label className="block font-display font-semibold text-[10px] uppercase tracking-wider text-gray-400 mb-1">Date</label>
           <input
             type="date"
             required
             min={minDateStr}
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-green-600"
+            className="w-full border-2 border-gray-200 rounded-xl px-2.5 py-1.5 text-sm font-medium
+                       focus:outline-none focus:border-brand transition-colors bg-white"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
+          <label className="block font-display font-semibold text-[10px] uppercase tracking-wider text-gray-400 mb-1">Time</label>
           <select
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-green-600"
+            className="w-full border-2 border-gray-200 rounded-xl px-2.5 py-1.5 text-sm font-medium
+                       focus:outline-none focus:border-brand transition-colors bg-white"
           >
             {TIME_SLOTS.map((t) => (
               <option key={t} value={t}>{t}</option>
@@ -145,29 +145,29 @@ function AlertForm({ court }: { court: Court }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Your email</label>
+        <label className="block font-display font-semibold text-[10px] uppercase tracking-wider text-gray-400 mb-1">Email</label>
         <input
           type="email"
           required
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm
-                     focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full border-2 border-gray-200 rounded-xl px-2.5 py-1.5 text-sm font-medium
+                     focus:outline-none focus:border-brand transition-colors bg-white
+                     placeholder:text-gray-300 placeholder:font-normal"
         />
       </div>
 
-      {status === "error" && (
-        <p className="text-red-600 text-sm">{message}</p>
-      )}
+      {status === "error" && <p className="text-coral text-xs font-medium">{message}</p>}
 
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold
-                   py-2 rounded-lg transition-colors disabled:opacity-50"
+        className="w-full bg-coral hover:bg-coral-dark text-white font-display font-bold
+                   uppercase tracking-widest py-2.5 rounded-xl transition-all disabled:opacity-50
+                   text-xs active:scale-[0.99]"
       >
-        {status === "loading" ? "Setting alert…" : "Notify me"}
+        {status === "loading" ? "Setting alert…" : "Notify me →"}
       </button>
     </form>
   );
@@ -186,36 +186,63 @@ function CourtCard({
 
   const dropLabel =
     court.drop_time && court.drop_day_offset
-      ? `Opens ${court.drop_day_offset}d before at ${court.drop_time.slice(0, 5)}`
+      ? `${court.drop_day_offset}d before · ${court.drop_time.slice(0, 5)}`
       : "Drop time unknown";
 
   return (
     <div
       onClick={onSelect}
-      className={`bg-white rounded-xl border p-4 cursor-pointer transition-all
-        ${selected ? "border-green-500 ring-1 ring-green-400 shadow-sm" : "border-gray-200 hover:border-gray-300"}`}
+      className={`bg-white rounded-2xl p-4 cursor-pointer transition-all
+        ${selected
+          ? "ring-2 ring-coral shadow-md shadow-coral/10"
+          : "border border-gray-100 hover:shadow-sm hover:border-gray-200"
+        }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 text-sm leading-tight">{court.name}</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <h3 className="font-display font-bold uppercase tracking-wide text-brand text-sm leading-tight">
+            {court.name}
+          </h3>
+          <p className="text-xs text-gray-400 mt-0.5">
             {court.postcode} · {court.distance_miles.toFixed(1)} mi
           </p>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
             <DropTimeBadge confidence={court.drop_time_confidence} />
-            <span className="text-xs text-gray-400">{dropLabel}</span>
+            <span className="text-[10px] text-gray-400 font-medium">{dropLabel}</span>
           </div>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-          className="shrink-0 bg-green-600 hover:bg-green-700 text-white text-xs
-                     font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+          className={`shrink-0 font-display font-bold uppercase tracking-wide text-xs px-3 py-1.5 rounded-lg transition-all whitespace-nowrap
+            ${open
+              ? "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              : "bg-coral text-white hover:bg-coral-dark active:scale-[0.98]"
+            }`}
         >
-          {open ? "Cancel" : "Get notified"}
+          {open ? "Cancel" : "Alert →"}
         </button>
       </div>
 
       {open && <AlertForm court={court} />}
+    </div>
+  );
+}
+
+function SidebarSkeleton() {
+  return (
+    <div className="flex h-full">
+      <div className="w-96 shrink-0 flex flex-col border-r border-gray-200 bg-stone-50">
+        <div className="bg-brand px-5 py-4 shrink-0">
+          <div className="h-5 w-40 bg-white/20 rounded animate-pulse" />
+          <div className="h-3 w-24 bg-white/10 rounded mt-2 animate-pulse" />
+        </div>
+        <div className="flex-1 p-3 space-y-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 h-20 animate-pulse border border-gray-100" />
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 bg-gray-100 animate-pulse" />
     </div>
   );
 }
@@ -262,25 +289,19 @@ function CourtsContent() {
 
   const hiddenCount = courts.length - displayCourts.length;
 
-  if (loading) {
-    return (
-      <div className="flex h-full">
-        <div className="w-96 shrink-0 p-4 space-y-3 overflow-y-auto border-r border-gray-200 bg-gray-50">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse h-20" />
-          ))}
-        </div>
-        <div className="flex-1 bg-gray-100 animate-pulse" />
-      </div>
-    );
-  }
+  if (loading) return <SidebarSkeleton />;
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-sm">
-          <p className="text-red-700">{error}</p>
-          <a href="/" className="text-sm text-red-600 underline mt-2 inline-block">Try again</a>
+      <div className="flex items-center justify-center h-full bg-stone-50">
+        <div className="text-center max-w-xs">
+          <p className="font-display font-bold uppercase tracking-wide text-brand text-lg mb-2">
+            Something went wrong
+          </p>
+          <p className="text-gray-500 text-sm mb-4">{error}</p>
+          <a href="/" className="inline-block bg-coral text-white font-display font-bold uppercase tracking-wider text-xs px-6 py-2.5 rounded-xl hover:bg-coral-dark transition-colors">
+            Try again
+          </a>
         </div>
       </div>
     );
@@ -288,17 +309,22 @@ function CourtsContent() {
 
   return (
     <div className="flex h-full">
-      {/* Left panel */}
-      <div className="w-96 shrink-0 flex flex-col border-r border-gray-200 bg-gray-50">
-        {/* Header */}
-        <div className="px-4 py-3 border-b border-gray-200 bg-white shrink-0">
-          <div className="flex items-center justify-between">
+      {/* Left sidebar */}
+      <div className="w-96 shrink-0 flex flex-col border-r border-gray-200 bg-stone-50">
+        {/* Sidebar header */}
+        <div className="bg-brand px-5 py-4 shrink-0">
+          <div className="flex items-start justify-between">
             <div>
-              <h1 className="font-bold text-gray-900">Courts near {postcode}</h1>
-              <p className="text-xs text-gray-500">Within {radius} mile{radius !== "1" ? "s" : ""}</p>
+              <h1 className="font-display font-bold uppercase tracking-[0.12em] text-white text-base leading-tight">
+                Courts near {postcode}
+              </h1>
+              <p className="text-white/50 text-xs font-display uppercase tracking-wider mt-0.5">
+                Within {radius} mile{radius !== "1" ? "s" : ""}
+                {displayCourts.length > 0 && ` · ${displayCourts.length} shown`}
+              </p>
             </div>
-            <a href="/" className="text-xs text-green-600 hover:text-green-700 font-medium">
-              ← Change
+            <a href="/" className="text-white/60 hover:text-white font-display font-semibold uppercase tracking-wider text-[10px] transition-colors mt-0.5">
+              ← Back
             </a>
           </div>
         </div>
@@ -306,8 +332,10 @@ function CourtsContent() {
         {/* Court list */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {displayCourts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-sm">No courts in current view.</p>
+            <div className="text-center py-16">
+              <p className="font-display font-bold uppercase tracking-wide text-brand text-sm">
+                No courts in view
+              </p>
               <p className="text-gray-400 text-xs mt-1">Zoom out or pan the map.</p>
             </div>
           ) : (
@@ -325,8 +353,8 @@ function CourtsContent() {
                 </div>
               ))}
               {hiddenCount > 0 && (
-                <p className="text-center text-xs text-gray-400 py-2">
-                  +{hiddenCount} court{hiddenCount !== 1 ? "s" : ""} outside current view — zoom or pan to see them
+                <p className="text-center text-[10px] text-gray-400 font-display uppercase tracking-wider py-3">
+                  +{hiddenCount} court{hiddenCount !== 1 ? "s" : ""} outside view
                 </p>
               )}
             </>
@@ -334,7 +362,7 @@ function CourtsContent() {
         </div>
       </div>
 
-      {/* Map panel */}
+      {/* Map */}
       <div className="flex-1 relative">
         {origin && (
           <MapView
@@ -352,18 +380,7 @@ function CourtsContent() {
 
 export default function CourtsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex h-full">
-          <div className="w-96 shrink-0 p-4 space-y-3 border-r border-gray-200 bg-gray-50">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse h-20" />
-            ))}
-          </div>
-          <div className="flex-1 bg-gray-100 animate-pulse" />
-        </div>
-      }
-    >
+    <Suspense fallback={<SidebarSkeleton />}>
       <CourtsContent />
     </Suspense>
   );

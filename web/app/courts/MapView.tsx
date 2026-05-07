@@ -7,15 +7,15 @@ import "leaflet/dist/leaflet.css";
 
 const courtIcon = L.divIcon({
   className: "",
-  html: `<div style="width:14px;height:14px;border-radius:50%;background:#16a34a;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.35)"></div>`,
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
+  html: `<div style="width:12px;height:12px;border-radius:50%;background:#f97444;border:2.5px solid white;box-shadow:0 1px 4px rgba(249,116,68,0.5)"></div>`,
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
   popupAnchor: [0, -10],
 });
 
 const courtIconSelected = L.divIcon({
   className: "",
-  html: `<div style="width:20px;height:20px;border-radius:50%;background:#15803d;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.45)"></div>`,
+  html: `<div style="width:20px;height:20px;border-radius:50%;background:#124d54;border:3px solid white;box-shadow:0 2px 8px rgba(18,77,84,0.5)"></div>`,
   iconSize: [20, 20],
   iconAnchor: [10, 10],
   popupAnchor: [0, -12],
@@ -23,7 +23,7 @@ const courtIconSelected = L.divIcon({
 
 const originIcon = L.divIcon({
   className: "",
-  html: `<div style="width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 1px 6px rgba(0,0,0,0.4)"></div>`,
+  html: `<div style="width:16px;height:16px;border-radius:50%;background:white;border:4px solid #124d54;box-shadow:0 2px 6px rgba(18,77,84,0.4)"></div>`,
   iconSize: [16, 16],
   iconAnchor: [8, 8],
   popupAnchor: [0, -10],
@@ -92,7 +92,7 @@ export default function MapView({ origin, courts, selectedId, onCourtSelect, onB
 
       <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
         <Popup>
-          <span className="text-sm font-medium">Your location</span>
+          <span style={{ fontFamily: "sans-serif", fontSize: "12px", fontWeight: 600 }}>Your location</span>
         </Popup>
       </Marker>
 
@@ -104,8 +104,12 @@ export default function MapView({ origin, courts, selectedId, onCourtSelect, onB
           eventHandlers={{ click: () => onCourtSelect(court.id) }}
         >
           <Popup>
-            <div className="text-sm font-medium">{court.name}</div>
-            <div className="text-xs text-gray-500">{court.distance_miles.toFixed(1)} mi away</div>
+            <div style={{ fontFamily: "sans-serif", fontSize: "12px", fontWeight: 700, color: "#124d54" }}>
+              {court.name}
+            </div>
+            <div style={{ fontFamily: "sans-serif", fontSize: "11px", color: "#9ca3af", marginTop: "2px" }}>
+              {court.distance_miles.toFixed(1)} mi away
+            </div>
           </Popup>
         </Marker>
       ))}
