@@ -223,48 +223,6 @@ function CourtsContent() {
       .finally(() => setLoading(false));
   }, [postcode, radius]);
 
-  if (loading) {
-    return (
-      <div className="space-y-3">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse h-24" />
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-        <p className="text-red-700">{error}</p>
-        <a href="/" className="text-sm text-red-600 underline mt-2 inline-block">Try again</a>
-      </div>
-    );
-  }
-
-  if (courts.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <p className="text-gray-500">No courts found within {radius} mile{radius !== "1" ? "s" : ""} of {postcode}.</p>
-        <a href="/" className="text-green-600 underline text-sm mt-2 inline-block">Search again</a>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {courts.map((court) => (
-        <CourtCard key={court.id} court={court} />
-      ))}
-    </div>
-  );
-}
-
-export default function CourtsPage() {
-  const params = useSearchParams();
-  const postcode = params.get("postcode") ?? "";
-  const radius   = params.get("radius") ?? "3";
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -280,15 +238,46 @@ export default function CourtsPage() {
         </a>
       </div>
 
-      <Suspense fallback={
+      {loading ? (
         <div className="space-y-3">
-          {[1,2,3].map(i => (
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse h-24" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-5">
+          <p className="text-red-700">{error}</p>
+          <a href="/" className="text-sm text-red-600 underline mt-2 inline-block">Try again</a>
+        </div>
+      ) : courts.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <p className="text-gray-500">No courts found within {radius} mile{radius !== "1" ? "s" : ""} of {postcode}.</p>
+          <a href="/" className="text-green-600 underline text-sm mt-2 inline-block">Search again</a>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {courts.map((court) => (
+            <CourtCard key={court.id} court={court} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function CourtsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <div className="h-10 bg-gray-200 rounded animate-pulse w-64" />
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
             <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 h-24 animate-pulse" />
           ))}
         </div>
-      }>
-        <CourtsContent />
-      </Suspense>
-    </div>
+      </div>
+    }>
+      <CourtsContent />
+    </Suspense>
   );
 }
