@@ -305,6 +305,7 @@ function CourtsContent() {
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [visibleIds, setVisibleIds] = useState<string[]>([]);
+  const [mobileView, setMobileView] = useState<"map" | "list">("map");
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
@@ -354,8 +355,11 @@ function CourtsContent() {
 
   return (
     <div className="flex h-full">
-      {/* Left sidebar */}
-      <div className="w-96 shrink-0 flex flex-col border-r border-gray-200 bg-stone-50">
+      {/* Left sidebar — full screen on mobile when mobileView==="list", fixed width on desktop */}
+      <div className={`shrink-0 flex-col border-r border-gray-200 bg-stone-50
+        w-full md:w-96
+        ${mobileView === "list" ? "flex" : "hidden"} md:flex`}>
+
         <div className="bg-brand px-5 py-4 shrink-0">
           <div className="flex items-start justify-between">
             <div>
@@ -366,9 +370,18 @@ function CourtsContent() {
                 {displayCourts.length} in current view
               </p>
             </div>
-            <a href="/" className="text-white/60 hover:text-white font-display font-semibold uppercase tracking-wider text-[10px] transition-colors mt-0.5">
-              ← Back
-            </a>
+            <div className="flex items-center gap-3 mt-0.5">
+              {/* Mobile: switch to map view */}
+              <button
+                onClick={() => setMobileView("map")}
+                className="md:hidden font-display font-bold uppercase tracking-wider text-[10px] text-white/70 hover:text-white transition-colors"
+              >
+                Map ↗
+              </button>
+              <a href="/" className="text-white/60 hover:text-white font-display font-semibold uppercase tracking-wider text-[10px] transition-colors">
+                ← Back
+              </a>
+            </div>
           </div>
         </div>
 
@@ -389,7 +402,10 @@ function CourtsContent() {
                 <CourtCard
                   court={court}
                   selected={court.id === selectedId}
-                  onSelect={() => setSelectedId(court.id)}
+                  onSelect={() => {
+                    setSelectedId(court.id);
+                    setMobileView("map");
+                  }}
                 />
               </div>
             ))
@@ -397,8 +413,9 @@ function CourtsContent() {
         </div>
       </div>
 
-      {/* Map */}
-      <div className="flex-1 relative">
+      {/* Map — full screen on mobile when mobileView==="map" */}
+      <div className={`flex-1 relative
+        ${mobileView === "map" ? "flex" : "hidden"} md:flex`}>
         {origin && (
           <MapView
             origin={origin}
@@ -409,6 +426,16 @@ function CourtsContent() {
             onBoundsChange={setVisibleIds}
           />
         )}
+
+        {/* Mobile toggle: show list */}
+        <button
+          onClick={() => setMobileView("list")}
+          className="md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]
+                     bg-brand text-white font-display font-bold uppercase tracking-widest
+                     text-xs px-5 py-3 rounded-full shadow-lg active:scale-95 transition-transform"
+        >
+          ☰ View list
+        </button>
       </div>
     </div>
   );
