@@ -24,7 +24,8 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="h-full overflow-y-auto">
+    <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Find courts near you</h1>
         <p className="mt-2 text-gray-600">
@@ -96,6 +97,7 @@ export default function Home() {
           will kick in within 2 weeks of your first search.
         </p>
       </div>
+    </div>
     </div>
   );
 }

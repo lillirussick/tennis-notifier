@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prevent Tailwind's img reset from breaking Leaflet map tiles */
+.leaflet-container img {
+  max-width: none !important;
+}
