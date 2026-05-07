@@ -16,7 +16,7 @@ function calcNotifyAt(
   const [hh, mm] = dropTime.split(":").map(Number);
   const drop = new Date(desiredDate + "T00:00:00Z");
   drop.setUTCDate(drop.getUTCDate() - dropDayOffset);
-  drop.setUTCHours(hh, mm - 5, 0, 0); // 5 minutes before drop
+  drop.setUTCHours(hh, mm - 5, 0, 0);
   return drop.toISOString();
 }
 
@@ -28,19 +28,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // Basic email validation
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   }
 
-  // Check desired_date is in the future
   if (new Date(desired_date) <= new Date()) {
     return NextResponse.json({ error: "Date must be in the future" }, { status: 400 });
   }
 
-  // Fetch court to get drop time info
   const { data: court, error: courtError } = await supabase
-    .table("courts")
+    .from("courts")
     .select("drop_day_offset, drop_time, drop_time_confidence")
     .eq("id", court_id)
     .single();
@@ -51,11 +48,11 @@ export async function POST(req: NextRequest) {
 
   const notify_at = calcNotifyAt(
     desired_date,
-    court.drop_day_offset,
-    court.drop_time
+    court.drop_day_offset as number | null,
+    court.drop_time as string | null
   );
 
-  const { error } = await supabase.table("alerts").insert({
+  const { error } = await supabase.from("alerts").insert({
     email,
     court_id,
     desired_date,

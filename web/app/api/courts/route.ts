@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { distanceMiles, geocodePostcode } from "@/lib/geocode";
+import { distanceMiles, geocodePostcode, Coords } from "@/lib/geocode";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!
 );
+
+interface Court {
+  id: string;
+  name: string;
+  postcode: string;
+  lat: number;
+  lng: number;
+  drop_day_offset: number | null;
+  drop_time: string | null;
+  drop_time_confidence: "unknown" | "learned" | "confirmed";
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -22,21 +33,21 @@ export async function GET(req: NextRequest) {
   }
 
   const { data: courts, error } = await supabase
-    .table("courts")
+    .from("courts")
     .select("id, name, postcode, lat, lng, drop_day_offset, drop_time, drop_time_confidence");
 
   if (error) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 
-  const nearby = (courts ?? [])
-    .filter((c) => c.lat && c.lng)
-    .map((c) => ({
+  const nearby = (courts as Court[] ?? [])
+    .filter((c: Court) => c.lat && c.lng)
+    .map((c: Court) => ({
       ...c,
-      distance_miles: distanceMiles(coords, { lat: c.lat, lng: c.lng }),
+      distance_miles: distanceMiles(coords, { lat: c.lat, lng: c.lng } as Coords),
     }))
-    .filter((c) => c.distance_miles <= radius)
-    .sort((a, b) => a.distance_miles - b.distance_miles);
+    .filter((c: Court & { distance_miles: number }) => c.distance_miles <= radius)
+    .sort((a: Court & { distance_miles: number }, b: Court & { distance_miles: number }) => a.distance_miles - b.distance_miles);
 
   return NextResponse.json({ courts: nearby, origin: coords });
 }
