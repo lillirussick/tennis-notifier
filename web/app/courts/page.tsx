@@ -19,11 +19,7 @@ interface Court {
   drop_time_confidence: "unknown" | "learned" | "confirmed";
   clubspark_slug: string | null;
   venue_uuid: string | null;
-}
-
-function ltaUrl(court: Court): string | null {
-  if (!court.clubspark_slug || !court.venue_uuid) return null;
-  return `https://www.lta.org.uk/play/book-a-tennis-court/courts/${court.clubspark_slug}_${court.venue_uuid}/`;
+  booking_url: string | null;
 }
 
 interface Coords {
@@ -35,6 +31,11 @@ const TIME_SLOTS = Array.from({ length: 15 }, (_, i) => {
   const h = i + 7;
   return `${String(h).padStart(2, "0")}:00`;
 });
+
+function ltaUrl(court: Court): string | null {
+  if (!court.clubspark_slug || !court.venue_uuid) return null;
+  return `https://www.lta.org.uk/play/book-a-tennis-court/courts/${court.clubspark_slug}_${court.venue_uuid}/`;
+}
 
 function DropTimeBadge({ confidence }: { confidence: Court["drop_time_confidence"] }) {
   if (confidence === "unknown") {
@@ -190,6 +191,8 @@ function CourtCard({
   onSelect: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const isClubspark = !!court.venue_uuid;
+  const ltaLink = ltaUrl(court);
 
   const dropLabel =
     court.drop_time && court.drop_day_offset
@@ -217,31 +220,56 @@ function CourtCard({
             <DropTimeBadge confidence={court.drop_time_confidence} />
             <span className="text-[10px] text-gray-400 font-medium">{dropLabel}</span>
           </div>
-          {ltaUrl(court) && (
-            <a
-              href={ltaUrl(court)!}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-block mt-2 text-[10px] font-display font-semibold uppercase tracking-wider text-brand/50 hover:text-brand transition-colors"
-            >
-              View on LTA ↗
-            </a>
+
+          {/* Booking links */}
+          <div className="flex items-center gap-3 mt-2">
+            {isClubspark && ltaLink && (
+              <a
+                href={ltaLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-[10px] font-display font-semibold uppercase tracking-wider text-coral hover:text-coral-dark transition-colors"
+              >
+                View on LTA ↗
+              </a>
+            )}
+            {!isClubspark && court.booking_url && (
+              <a
+                href={court.booking_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-[10px] font-display font-semibold uppercase tracking-wider text-coral hover:text-coral-dark transition-colors"
+              >
+                Book here ↗
+              </a>
+            )}
+          </div>
+
+          {/* Non-Clubspark notice */}
+          {!isClubspark && (
+            <p className="text-[10px] text-gray-400 mt-1.5 leading-relaxed">
+              Not on LTA — booking alerts unavailable for this court.
+            </p>
           )}
         </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-          className={`shrink-0 font-display font-bold uppercase tracking-wide text-xs px-3 py-1.5 rounded-lg transition-all whitespace-nowrap
-            ${open
-              ? "bg-gray-100 text-gray-500 hover:bg-gray-200"
-              : "bg-coral text-white hover:bg-coral-dark active:scale-[0.98]"
-            }`}
-        >
-          {open ? "Cancel" : "Alert →"}
-        </button>
+
+        {isClubspark ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
+            className={`shrink-0 font-display font-bold uppercase tracking-wide text-xs px-3 py-1.5 rounded-lg transition-all whitespace-nowrap
+              ${open
+                ? "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                : "bg-coral text-white hover:bg-coral-dark active:scale-[0.98]"
+              }`}
+          >
+            {open ? "Cancel" : "Alert →"}
+          </button>
+        ) : null}
       </div>
 
-      {open && <AlertForm court={court} />}
+      {isClubspark && open && <AlertForm court={court} />}
     </div>
   );
 }
@@ -269,6 +297,7 @@ function CourtsContent() {
   const params = useSearchParams();
   const postcode = params.get("postcode") ?? "";
   const radius = params.get("radius") ?? "3";
+  const radiusNum = parseFloat(radius);
 
   const [courts, setCourts] = useState<Court[]>([]);
   const [origin, setOrigin] = useState<Coords | null>(null);
@@ -280,7 +309,7 @@ function CourtsContent() {
 
   useEffect(() => {
     if (!postcode) return;
-    fetch(`/api/courts?postcode=${encodeURIComponent(postcode)}&radius=${radius}`)
+    fetch(`/api/courts?postcode=${encodeURIComponent(postcode)}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.error) {
@@ -292,7 +321,7 @@ function CourtsContent() {
       })
       .catch(() => setError("Failed to load courts."))
       .finally(() => setLoading(false));
-  }, [postcode, radius]);
+  }, [postcode]);
 
   useEffect(() => {
     if (selectedId) {
@@ -304,8 +333,6 @@ function CourtsContent() {
   const displayCourts = visibleIds.length > 0
     ? courts.filter((c) => visibleIds.includes(c.id))
     : courts;
-
-  const hiddenCount = courts.length - displayCourts.length;
 
   if (loading) return <SidebarSkeleton />;
 
@@ -329,7 +356,6 @@ function CourtsContent() {
     <div className="flex h-full">
       {/* Left sidebar */}
       <div className="w-96 shrink-0 flex flex-col border-r border-gray-200 bg-stone-50">
-        {/* Sidebar header */}
         <div className="bg-brand px-5 py-4 shrink-0">
           <div className="flex items-start justify-between">
             <div>
@@ -337,8 +363,7 @@ function CourtsContent() {
                 Courts near {postcode}
               </h1>
               <p className="text-white/50 text-xs font-display uppercase tracking-wider mt-0.5">
-                Within {radius} mile{radius !== "1" ? "s" : ""}
-                {displayCourts.length > 0 && ` · ${displayCourts.length} shown`}
+                {displayCourts.length} in current view
               </p>
             </div>
             <a href="/" className="text-white/60 hover:text-white font-display font-semibold uppercase tracking-wider text-[10px] transition-colors mt-0.5">
@@ -347,7 +372,6 @@ function CourtsContent() {
           </div>
         </div>
 
-        {/* Court list */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {displayCourts.length === 0 ? (
             <div className="text-center py-16">
@@ -357,25 +381,18 @@ function CourtsContent() {
               <p className="text-gray-400 text-xs mt-1">Zoom out or pan the map.</p>
             </div>
           ) : (
-            <>
-              {displayCourts.map((court) => (
-                <div
-                  key={court.id}
-                  ref={(el) => { if (el) cardRefs.current.set(court.id, el); }}
-                >
-                  <CourtCard
-                    court={court}
-                    selected={court.id === selectedId}
-                    onSelect={() => setSelectedId(court.id)}
-                  />
-                </div>
-              ))}
-              {hiddenCount > 0 && (
-                <p className="text-center text-[10px] text-gray-400 font-display uppercase tracking-wider py-3">
-                  +{hiddenCount} court{hiddenCount !== 1 ? "s" : ""} outside view
-                </p>
-              )}
-            </>
+            displayCourts.map((court) => (
+              <div
+                key={court.id}
+                ref={(el) => { if (el) cardRefs.current.set(court.id, el); }}
+              >
+                <CourtCard
+                  court={court}
+                  selected={court.id === selectedId}
+                  onSelect={() => setSelectedId(court.id)}
+                />
+              </div>
+            ))
           )}
         </div>
       </div>
@@ -386,6 +403,7 @@ function CourtsContent() {
           <MapView
             origin={origin}
             courts={courts}
+            radius={radiusNum}
             selectedId={selectedId}
             onCourtSelect={(id) => setSelectedId(id)}
             onBoundsChange={setVisibleIds}

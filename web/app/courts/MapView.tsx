@@ -71,6 +71,7 @@ interface Coords {
 interface Props {
   origin: Coords;
   courts: Court[];
+  radius: number;
   selectedId: string | null;
   onCourtSelect: (id: string) => void;
   onBoundsChange: (ids: string[]) => void;
@@ -101,22 +102,28 @@ function BoundsTracker({
   return null;
 }
 
-function FitBounds({ courts, origin }: { courts: Court[]; origin: Coords }) {
+function FitBounds({ origin, radius }: { origin: Coords; radius: number }) {
   const map = useMap();
   const fitted = useRef(false);
 
   useEffect(() => {
-    if (fitted.current || courts.length === 0) return;
+    if (fitted.current) return;
     fitted.current = true;
-    const bounds = L.latLngBounds([[origin.lat, origin.lng]]);
-    courts.forEach((c) => bounds.extend([c.lat, c.lng]));
-    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
-  }, [courts, map, origin]);
+    const km = radius * 1.60934;
+    const latDelta = km / 111;
+    const lngDelta = km / (111 * Math.cos((origin.lat * Math.PI) / 180));
+    const bounds = L.latLngBounds(
+      [origin.lat - latDelta, origin.lng - lngDelta],
+      [origin.lat + latDelta, origin.lng + lngDelta]
+    );
+    map.fitBounds(bounds, { padding: [40, 40] });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 }
 
-export default function MapView({ origin, courts, selectedId, onCourtSelect, onBoundsChange }: Props) {
+export default function MapView({ origin, courts, radius, selectedId, onCourtSelect, onBoundsChange }: Props) {
   return (
     <MapContainer
       center={[origin.lat, origin.lng]}
@@ -130,7 +137,7 @@ export default function MapView({ origin, courts, selectedId, onCourtSelect, onB
       />
 
       <BoundsTracker courts={courts} onBoundsChange={onBoundsChange} />
-      <FitBounds courts={courts} origin={origin} />
+      <FitBounds origin={origin} radius={radius} />
 
       <Marker position={[origin.lat, origin.lng]} icon={originIcon} zIndexOffset={1000}>
         <Popup>
@@ -150,7 +157,7 @@ export default function MapView({ origin, courts, selectedId, onCourtSelect, onB
               {court.name}
             </div>
             <div style={{ fontFamily: "sans-serif", fontSize: "11px", color: "#9ca3af", marginTop: "2px" }}>
-              {court.distance_miles.toFixed(1)} mi away
+              {court.distance_miles.toFixed(1)} mi from search
             </div>
           </Popup>
         </Marker>
